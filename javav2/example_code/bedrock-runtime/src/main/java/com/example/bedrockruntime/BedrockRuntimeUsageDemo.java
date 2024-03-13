@@ -25,6 +25,7 @@ public class BedrockRuntimeUsageDemo {
     private static final Random random = new Random();
 
     private static final String CLAUDE = "anthropic.claude-v2";
+    private static final String CLAUDE3_SONNET = "anthropic.claude-3-sonnet-20240229-v1:0";
     private static final String JURASSIC2 = "ai21.j2-mid-v1";
     private static final String LLAMA2 = "meta.llama2-13b-chat-v1";
     private static final String MISTRAL7B = "mistral.mistral-7b-instruct-v0:2";
@@ -35,17 +36,18 @@ public class BedrockRuntimeUsageDemo {
     public static void main(String[] args) {
         BedrockRuntimeUsageDemo.textToText();
         BedrockRuntimeUsageDemo.textToTextWithResponseStream();
-        BedrockRuntimeUsageDemo.textToImage();
+        //BedrockRuntimeUsageDemo.textToImage();
     }
 
     private static void textToText() {
 
-        String prompt = "In one sentence, what is a large-language model?";
-        BedrockRuntimeUsageDemo.invoke(CLAUDE, prompt);
-        BedrockRuntimeUsageDemo.invoke(JURASSIC2, prompt);
-        BedrockRuntimeUsageDemo.invoke(LLAMA2, prompt);
-        BedrockRuntimeUsageDemo.invoke(MISTRAL7B, prompt);
-        BedrockRuntimeUsageDemo.invoke(MIXTRAL8X7B, prompt);
+        String prompt = "为什么火箭会升空?请用中文回答";
+        //BedrockRuntimeUsageDemo.invoke(CLAUDE, prompt);
+        BedrockRuntimeUsageDemo.invoke(CLAUDE3_SONNET, prompt);
+        //BedrockRuntimeUsageDemo.invoke(JURASSIC2, prompt);
+        //BedrockRuntimeUsageDemo.invoke(LLAMA2, prompt);
+        //BedrockRuntimeUsageDemo.invoke(MISTRAL7B, prompt);
+        //BedrockRuntimeUsageDemo.invoke(MIXTRAL8X7B, prompt);
     }
 
     private static void invoke(String modelId, String prompt) {
@@ -61,6 +63,9 @@ public class BedrockRuntimeUsageDemo {
             switch (modelId) {
                 case CLAUDE:
                     printResponse(invokeClaude(prompt));
+                    break;
+                case CLAUDE3_SONNET:
+                    printResponse(invokeClaude3_sonnet(prompt));
                     break;
                 case JURASSIC2:
                     printResponse(invokeJurassic2(prompt));
@@ -106,8 +111,10 @@ public class BedrockRuntimeUsageDemo {
     }
 
     private static void textToTextWithResponseStream() {
-        String prompt = "What is a large-language model?";
-        BedrockRuntimeUsageDemo.invokeWithResponseStream(CLAUDE, prompt);
+        //String prompt = "What is a large-language model?";
+        String prompt = "为什么火箭会升空?请用中文回答";
+        //BedrockRuntimeUsageDemo.invokeWithResponseStream(CLAUDE, prompt);
+        BedrockRuntimeUsageDemo.invokeWithResponseStream_claude3(CLAUDE3_SONNET, prompt);
     }
 
     private static void invokeWithResponseStream(String modelId, String prompt) {
@@ -118,6 +125,20 @@ public class BedrockRuntimeUsageDemo {
         try {
             var silent = false;
             InvokeModelWithResponseStream.invokeClaude(prompt, silent);
+        } catch (BedrockRuntimeException e) {
+            System.out.println("Couldn't invoke model " + modelId + ": " + e.getMessage());
+            throw e;
+        }
+    }
+
+    private static void invokeWithResponseStream_claude3(String modelId, String prompt) {
+        System.out.println(new String(new char[88]).replace("\0", "-"));
+        System.out.printf("Invoking %s with response stream%n", modelId);
+        System.out.println("Prompt: " + prompt);
+
+        try {
+            var silent = false;
+            InvokeModelWithResponseStream.invokeClaude3_sonnet(prompt, silent);
         } catch (BedrockRuntimeException e) {
             System.out.println("Couldn't invoke model " + modelId + ": " + e.getMessage());
             throw e;

@@ -158,6 +158,70 @@ public class InvokeModel {
         }
         // snippet-end:[bedrock-runtime.java2.invoke_claude.main]
 
+        // snippet-start:[bedrock-runtime.java2.invoke_claude.main]
+        /**
+         * Invokes the Anthropic Claude 2 model to run an inference based on the
+         * provided input.
+         *
+         * @param prompt The prompt for Claude to complete.
+         * @return The generated response.
+         */
+        public static String invokeClaude3_sonnet(String prompt) {
+                /*
+                 * The different model providers have individual request and response formats.
+                 * For the format, ranges, and default values for Anthropic Claude, refer to:
+                 * https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-claude.html
+                 */
+
+                String claudeModelId = "anthropic.claude-3-sonnet-20240229-v1:0";
+
+                // Claude requires you to enclose the prompt as follows:
+                //String enclosedPrompt = "Human: " + prompt + "\n\nAssistant:";
+
+                BedrockRuntimeClient client = BedrockRuntimeClient.builder()
+                                .region(Region.US_EAST_1)
+                                .credentialsProvider(ProfileCredentialsProvider.create())
+                                .build();
+                JSONObject content = new JSONObject();
+                content.put("type", "text");
+                content.put("text", prompt);
+
+                JSONArray contentArray = new JSONArray();
+                contentArray.put(content);
+
+                JSONObject messages = new JSONObject();
+                messages.put("role", "user");
+                messages.put("content", contentArray);
+
+                JSONArray arrayElementOneArray = new JSONArray();
+                arrayElementOneArray.put(messages);
+                String payload = new JSONObject()
+                                .put("anthropic_version", "bedrock-2023-05-31")
+                                .put("max_tokens", 200)
+                                .put("messages", arrayElementOneArray)
+                                .toString();
+
+                InvokeModelRequest request = InvokeModelRequest.builder()
+                                .body(SdkBytes.fromUtf8String(payload))
+                                .modelId(claudeModelId)
+                                .contentType("application/json")
+                                .accept("application/json")
+                                .build();
+
+                InvokeModelResponse response = client.invokeModel(request);
+
+                JSONObject responseBody = new JSONObject(response.body().asUtf8String());
+
+                //String generatedText = responseBody.getString("content");
+                //String generatedText = responseBody.getJSONArray("content").get(0).toString();
+                String generatedText = responseBody.getJSONArray("content").getJSONObject(0).getString("text");
+
+                //completion = json.getJSONObject("delta").getString("text");
+
+                return generatedText;
+        }
+        // snippet-end:[bedrock-runtime.java2.invoke_claude.main]
+
         // snippet-start:[bedrock-runtime.java2.invoke_jurassic2.main]
         /**
          * Invokes the AI21 Labs Jurassic-2 model to run an inference based on the
